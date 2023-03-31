@@ -2,6 +2,8 @@ from pytube import YouTube
 from pytube.cli import on_progress
 from sys import argv
 
+needaudio = False
+itag = int()
 
 try:
     url = argv[1]
@@ -12,12 +14,34 @@ except IndexError as e:
 yt = YouTube(url, on_progress_callback=on_progress)
 
 print(yt.title)
-for a in yt.streams:
-    print(a)
 
+for a in yt.streams:
+    print(a, "Size in Mb ", a.filesize_mb)
 
 itag = int(input('Enter the itag number  '))
 
-yd = yt.streams.get_by_itag(itag)
 
-yd.download()
+yd = yt.streams.get_by_itag(itag)
+print(yd, "Size in Mb ", yd.filesize_mb)
+
+if yd.is_dash:
+    print("need audio track")
+    for a in yt.streams.filter(only_audio=any):
+        print(a, "Size in Mb ", a.filesize_mb)
+
+    itaga = int(input('Enter the itag number  '))
+    yda = yt.streams.get_by_itag(itaga)
+    needaudio = True
+
+try:
+    yd.download()
+except AttributeError as e:
+    print("enter correct number of itag")
+
+if needaudio:
+    try:
+        yda.download(".\\audio")
+    except AttributeError as e:
+        print("enter correct number of itag")
+
+#yd.download()
