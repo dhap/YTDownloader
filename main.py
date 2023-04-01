@@ -5,6 +5,7 @@ from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import requests
 
 needaudio = False
+url = str()
 itag = int()
 
 #Check argument
@@ -15,18 +16,23 @@ except IndexError as e:
 
 #Validation URL
 while True:
-    print("Input the YouTube video URL")
-    url = str(input())
+    if url == "":
+        print("Input the YouTube video URL")
+        url = str(input())
     if url.count("https://www.youtube.com") > 0:
         r = requests.get(url) # random video id
         if 'unavailable_video.png' in r.text:
             print("Video unavailable")
+            print("Input the YouTube video URL")
+            url = str(input())
             continue
         else:
             yt = YouTube(url, on_progress_callback=on_progress)
             break
     else:
         print("This is not YouTube URL")
+        print("Input the YouTube video URL")
+        url = str(input())
         continue
 
 title = str(yt.title)
@@ -53,7 +59,7 @@ if yd.is_dash:
     needaudio = True
 
 try:
-    yd.download("\\YTD_video")
+    yd.download()
 except AttributeError as e:
     print("Enter correct number of itag")
 
