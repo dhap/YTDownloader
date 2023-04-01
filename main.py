@@ -20,7 +20,7 @@ title = str(yt.title)
 title = title.replace("//",'')
 print(title)
 
-for a in yt.streams:
+for a in yt.streams.filter(mime_type="video/mp4"):
     print(a, "Size in Mb ", a.filesize_mb)
 
 itag = int(input('Enter the itag number  '))
