@@ -19,7 +19,7 @@ while True:
     url = str(input())
     if url.count("https://www.youtube.com") > 0:
         r = requests.get(url) # random video id
-        if 'Video unavailable' in r.text:
+        if 'unavailable_video.png' in r.text:
             print("Video unavailable")
             continue
         else:
