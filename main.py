@@ -1,18 +1,21 @@
 from pytube import YouTube
 from pytube.cli import on_progress
+import pytube.request
 from sys import argv
-from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import requests
+from moviepy.video.io.VideoFileClip import VideoFileClip, AudioFileClip
+#from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import ffmpeg
 
 url = str()
 itag = int()
+pytube.request.default_range_size = 1048576
 
 #If stream without audio line
 def needaudiosplit(yd, yda):
     svideo = str(yd.download(".TYD"))
     saudio = str(yda.download(".TDA")) 
-    print(svideo,"================", saudio)
+
     # Open the video and audio
     video_clip = VideoFileClip(svideo)
     audio_clip = AudioFileClip(saudio)
@@ -20,9 +23,20 @@ def needaudiosplit(yd, yda):
     # Concatenate the video clip with the audio clip
     final_clip = video_clip.set_audio(audio_clip)
     SvideoOutput = svideo.replace(".mp4", "")
+    SvideoOutput = svideo.replace(".webm", "")
     SvideoOutput = SvideoOutput.replace(".TYD","")
     # Export the final video with audio
-    final_clip.write_videofile(svideo + ".mp4")
+    final_clip.write_videofile(SvideoOutput + ".mp4")
+    main()
+
+
+def ffmegCombine(yd, yda, title):
+
+    input_video = ffmpeg.input(yd.download(".TYD"))
+    input_audio = ffmpeg.input(yda.download(".TDA"))
+    ffmpeg.concat(input_video, input_audio, v=1, a=1).output(title+".mp4").run()
+    main()
+
 
 def validateItag(streamsIn):
     while True:
@@ -34,15 +48,6 @@ def validateItag(streamsIn):
         print("Enter correct number")
 
 
-def ffmegCombine(yd, yda):
-
-    input_video = ffmpeg.input(yd.download(".TYD"))
-    print(input_video)
-    input_audio = ffmpeg.input(yda.download(".TDA"))
-    print(input_audio)
-    ffmpeg.concat(input_video, input_audio, v=1, a=1).output('ffmpeg.mp4').run()
-
-        
 #Check argument
 def main():
     yt = YouTube(validateUrl(), on_progress_callback=on_progress)
@@ -50,10 +55,10 @@ def main():
     print(title)
 
     #Output streams
-    for a in yt.streams.filter(mime_type="video/mp4"):
+    for a in yt.streams:
         print(a, "    Size =", a.filesize_mb, "Mb")
 
-    yd = validateItag(yt.streams.filter(mime_type="video/mp4"))
+    yd = validateItag(yt.streams)
 
     print("Selected stream - ", yd, "Size - ", yd.filesize_mb, "Mb")
 
@@ -64,23 +69,18 @@ def main():
             print(a, "Size - ", a.filesize_mb, "Mb")
 
         yda = validateItag(yt.streams.filter(only_audio=any))
-        choise = int(input("Input 1, to choise pymovie, or 2 to choise ffmpeg"))
+        choise = int(input("Input 1, to choise pymovie, or 2 to choise ffmpeg  "))
 
         if choise == 1:
             needaudiosplit(yd, yda)
         if choise == 2:
-            ffmegCombine(yd, yda)
+            ffmegCombine(yd, yda, title)
     
     else:
-        try:
-            yd.download()
-        except AttributeError as e:
-            print("Enter correct number of itag")
-
-
+        yd.download()
 
 #Validation URL
-def validateUrl():
+def validateUrl():  
     while True:
         print("Paste YouTube video url")
         url = input()
