@@ -1,13 +1,14 @@
 from pytube import YouTube
 from pytube.cli import on_progress
 import pytube.request
-from sys import argv
 import requests
 from moviepy.video.io.VideoFileClip import VideoFileClip, AudioFileClip
-#from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import ffmpeg
+import datetime 
 
 url = str()
+date_naw = datetime.datetime.now()
+
 itag = int()
 pytube.request.default_range_size = 1048576
 
@@ -48,10 +49,12 @@ def validateItag(streamsIn):
         print("Enter correct number")
 
 
-#Check argument
 def main():
     yt = YouTube(validateUrl(), on_progress_callback=on_progress)
-    title = str(yt.title)
+    try:
+        title = str(yt.title)
+    except:
+        title = date_naw.strftime('%m_%d_%Y')        
     print(title)
 
     #Output streams
