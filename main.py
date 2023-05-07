@@ -51,10 +51,7 @@ def validateItag(streamsIn):
 
 def main():
     yt = YouTube(validateUrl(), on_progress_callback=on_progress)
-    try:
-        title = str(yt.title)
-    except:
-        title = date_naw.strftime('%m_%d_%Y')        
+    title = str(yt.title)
     print(title)
 
     #Output streams
