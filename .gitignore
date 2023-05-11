@@ -1,5 +1,3 @@
 *.mp4
-audio
-import ffmpeg.py
-from moviepy.py
-video
+.TDA/
+.TYD/
