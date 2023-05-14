@@ -1,19 +1,21 @@
 from pytube import YouTube
 from pytube.cli import on_progress
 import pytube.request
-from sys import argv
 import requests
 from moviepy.video.io.VideoFileClip import VideoFileClip, AudioFileClip
-#from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 import ffmpeg
+
 
 url = str()
 itag = int()
+
 pytube.request.default_range_size = 1048576 # 1Mb
+
+
 
 #If stream without audio line
 def needaudiosplit(yd, yda):
-    svideo = str(yd.download(".TYD"))
+    svideo = str(yd(".TYD"))
     saudio = str(yda.download(".TDA")) 
 
     # Open the video and audio
@@ -27,10 +29,12 @@ def needaudiosplit(yd, yda):
     SvideoOutput = SvideoOutput.replace(".TYD","")
     # Export the final video with audio
     final_clip.write_videofile(SvideoOutput + ".mp4")
+
    
 
 
 def ffmegCombine(yd, yda, filename):
+
 
     input_video = ffmpeg.input(yd.download("Video"))
     input_audio = ffmpeg.input(yda.download("Audio"))
@@ -48,7 +52,6 @@ def validateItag(streamsIn):
         print("Enter correct number")
 
 
-#Check argument
 def main():
     yt = YouTube(validateUrl(), on_progress_callback=on_progress)
     title = str(yt.title)
@@ -67,10 +70,9 @@ def main():
         print("need to download audio track for this choice")
         for a in yt.streams.filter(only_audio=any):
             print(a, "Size - ", a.filesize_mb, "Mb")
-
         yda = validateItag(yt.streams.filter(only_audio=any))
-        choise = int(input("Input 1, to choise pymovie, or 2 to choise ffmpeg  "))
 
+        choise = int(input("Input 1, to choise pymovie, or 2 to choise ffmpeg  "))
         if choise == 1:
             needaudiosplit(yd, yda)
         if choise == 2:
@@ -78,6 +80,7 @@ def main():
     
     else:
         yd.download()
+
 
 #Validation URL
 def validateUrl():  
