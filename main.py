@@ -1,16 +1,18 @@
 from pytube import YouTube
 from pytube.cli import on_progress
 import pytube.request
-from sys import argv
 import requests
 import ffmpeg
 
+
 url = str()
 itag = int()
+
 pytube.request.default_range_size = 1048576 # 1Mb
 
 
 def ffmegCombine(yd, yda, filename):
+
 
     input_video = ffmpeg.input(yd.download("Video"))
     input_audio = ffmpeg.input(yda.download("Audio"))
@@ -27,7 +29,6 @@ def validateItag(streamsIn):
         print("Enter correct number")
 
 
-#Check argument
 def main():
     yt = YouTube(validateUrl(), on_progress_callback=on_progress)
     title = str(yt.title)
@@ -54,9 +55,10 @@ def main():
 
         yda = validateItag(yt.streams.filter(only_audio=True, file_extension=mime_type))
         ffmegCombine(yd, yda, filename)
-    
+
     else:
         yd.download()
+
 
 #Validation URL
 def validateUrl():  
