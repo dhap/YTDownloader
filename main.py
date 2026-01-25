@@ -3,70 +3,90 @@ from pytube.cli import on_progress
 import pytube.request
 import requests
 import ffmpeg
-
+from datetime import datetime
 
 url = str()
 itag = int()
+download_start_time = datetime.now()
+pytube.request.default_range_size = 1048576  # 1Mb
 
-pytube.request.default_range_size = 1048576 # 1Mb
+# func split video and audio
 
 
 def ffmegCombine(yd, yda, filename):
-
-
     input_video = ffmpeg.input(yd.download("Video"))
     input_audio = ffmpeg.input(yda.download("Audio"))
     ffmpeg.output(input_audio, input_video, filename, codec='copy').run()
-   
+
+# validation imput itag
+
 
 def validateItag(streamsIn):
     while True:
         inputItag = str(input('Enter the itag number  '))
         for i in streamsIn:
             if "\"" + inputItag + "\"" in str(i):
-                
                 return i
         print("Enter correct number")
 
+# download time & speed
+
+
+def downloadCallback(stream, chunk, bytes_remaining):
+    global download_start_time
+    seconds_since_download_start = (
+        datetime.now()-download_start_time).total_seconds()
+    fileSize = stream.filesize
+    bytes_downloaded = fileSize - bytes_remaining
+    speed = round(((bytes_downloaded / 1024) / 1024) /
+                  seconds_since_download_start, 2)
+    percentage = round((bytes_downloaded / fileSize) * 100, 2)
+    seconds_left = round(((bytes_remaining / 1024) / 1024) / float(speed), 2)
+    print(f"{percentage}% Downloaded", f"{round(speed, 2)} Mbps speed",
+          f"{round(seconds_left, 2)} seconds", end="\r")
+
 
 def main():
-    yt = YouTube(validateUrl(), on_progress_callback=on_progress)
+    yt = YouTube(validateUrl(), on_progress_callback=downloadCallback)
     title = str(yt.title)
     print(title)
 
-    #Output streams
+    # Output streams
     for v in yt.streams.filter(type="video"):
         print(v, "    Size =", v.filesize_mb, "Mb")
 
     yd = validateItag(yt.streams.filter(type="video"))
-    filename = yd.default_filename
 
+    filename = yd.default_filename  # The default name output file
+
+    # Needs for combine audio and video
     if "webm" in filename:
         mime_type = "webm"
-    else: mime_type = "mp4"
+    else:
+        mime_type = "mp4"
 
     print("Selected stream - ", yd, "Size - ", yd.filesize_mb, "Mb")
 
-    #Chek if it is only video stresm without audio line
+    # Check if it is only video stream, without audio line
     if yd.is_dash:
         print("need to download audio track for this choice")
-        for a in yt.streams.filter(only_audio=True, file_extension=mime_type ):
+        for a in yt.streams.filter(only_audio=True, file_extension=mime_type):
             print(a, "Size - ", a.filesize_mb, "Mb")
 
-        yda = validateItag(yt.streams.filter(only_audio=True, file_extension=mime_type))
+        yda = validateItag(yt.streams.filter(
+            only_audio=True, file_extension=mime_type))
         ffmegCombine(yd, yda, filename)
-
     else:
         yd.download()
 
 
-#Validation URL
-def validateUrl():  
+# Validation URL
+def validateUrl():
     while True:
         print("Paste YouTube video url")
         url = input()
         if url.count("https://www.youtube.com") > 0:
-            r = requests.get(url) 
+            r = requests.get(url)
             if 'unavailable_video.png' in r.text:
                 print("This is not YouTube URL, input the YouTube video URL")
                 continue
@@ -78,4 +98,4 @@ def validateUrl():
 
 
 if __name__ == "__main__":
-	main()
+    main()
